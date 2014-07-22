@@ -1,0 +1,99 @@
+hash -d NAME=/directory/
+
+dirs [-v]
+pushd
+popd
+wd
+
+the flow plugin plays with:
+cdpath
+but cdpath doesn't impact cd completion...
+
+http://superuser.com/questions/751523/dynamic-directory-hash
+possibleDirsInPkg2=(
+    'Classes'           'C'
+    'Configuration'     'Co'
+    'Tests/Unit'        'TU'
+    'Tests/Functional'  'TF'
+    'Tests/Behavior'    'TB'
+    'Tests'             'T'
+    'Resources/Public'  'RPu'
+    'Resources/Private' 'RPr'
+    'Resources'         'R'
+    'Documentation'     'D'
+    'Migrations'        'M'
+    )
+possibleDirsInPkg=(
+    'C'   'Classes'
+    'Co'  'Configuration'
+    'TU'  'Tests/Unit'
+    'TF'  'Tests/Functional'
+    'TB'  'Tests/Behavior'
+    'T'   'Tests'
+    'RPu' 'Resources/Public'
+    'RPr' 'Resources/Private'
+    'R'   'Resources'
+    'D'   'Documentation'
+    'M'   'Migrations'
+    )
+
+
+Later, when working on making the dynamic named directories more readily available:
+
+In a regular zsh file:
+compdef _func foo
+is equavalent to, in a _func file:
+compdef foo
+
+#compdef foo -value-,-default-,-default
+#zstyle ':completion:*:*:-value-,*,*:*' <style> <string>
+specifies that _foo provides completions for the values of parameters for which no special function has been defined. This is usually handled by the function _value itself.
+
+#zstyle ':completion:*:*:-value-,*,*:*:files'
+
+http://zsh.sourceforge.net/Doc/Release/Completion-System.html#Overview-1
+':completion[:<1>[:<2>[:<3>[:<4>]]]]:<5>' <style> <string>
+<1>=function/widget
+		if called from named widget instead of general completion
+		Generally just *
+[<2>]=completer (function name w/o leading _ and other _ are -)
+		complete: simplest (_complete _ignore style first, then _complete)
+		http://zsh.sourceforge.net/Doc/Release/Completion-System.html#Control-Functions
+[<3>]=command or special -context-
+[<4>]=argument
+		argument-n (n=number of argument)
+		option-opt-n (opt=option, n=argument number for option)
+<5>=tag
+		tags are used to discriminate between the types of matches
+		http://zsh.sourceforge.net/Doc/Release/Completion-System.html#Standard-Tags
+		all-expansions all-files arguments directories local-directories files named-directories path-directories
+
+		descriptions: when looking up value of format style to generate descriptions for types of matches
+		corrections: used by the _approximate and _correct completers for possible corrections
+		default: used in some contexts to provide a way of supplying a default when more specific tags are also valid
+
+<style>=
+		http://zsh.sourceforge.net/Doc/Release/Completion-System.html#Standard-Styles
+		completer
+		format
+		list-prompt
+		group-name
+		separate-sections
+		insert-sections
+		menu
+		verbose
+		rehash
+<string>=
+
+
+I'm here:
+http://bewatermyfriend.org/p/2012/003/ (very good. Finished)
+http://zsh.sourceforge.net/Doc/Release/zsh_toc.html#SEC_Contents
+http://zsh.sourceforge.net/Doc/Release/Completion-System.html#Completion-Functions (reading _arguments)
+http://zsh.sourceforge.net/Doc/Release/Expansion.html#Dynamic-named-directories
+http://zsh.sourceforge.net/Guide/zshguide06.html
+https://github.com/mfaerevaag/wd/blob/master/wd.sh
+
+
+others links that I haven't reviewed yet:
+http://www.linux-mag.com/id/1106/

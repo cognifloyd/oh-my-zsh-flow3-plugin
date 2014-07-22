@@ -9,7 +9,7 @@ _flow() {
   if _flow_is_inside_base_distribution; then
 
     local startDirectory=`pwd`
-    while [ ! -f flow ]; do
+    while [[ ! -f flow ]]; do
       cd ..
     done
     if (( $CURRENT > 2 )); then
@@ -31,9 +31,9 @@ compdef _flow flow
 # from the root of the TYPO3 Flow distribution.
 #
 _flow_main_commands() {
-  if [ ! -f Data/Temporary/Development/.flow-autocompletion-maincommands ]; then
+  if [[ ! -f Data/Temporary/Development/.flow-autocompletion-maincommands ]]; then
     mkdir -p Data/Temporary/Development/
-    ./flow help | grep  "^[* ][ ][[:alnum:][:space:]]" | php $ZSH/custom/plugins/flow/helper-postprocess-cmdlist.php > Data/Temporary/Development/.flow-autocompletion-maincommands
+    ./flow help | grep  "^[* ][ ][[:alnum:][:space:]]" | php $ZSH_CUSTOM/plugins/flow/helper-postprocess-cmdlist.php > Data/Temporary/Development/.flow-autocompletion-maincommands
   fi
 
   # fills up cmdlist variable
@@ -47,7 +47,7 @@ _flow_main_commands() {
 # from the root of the TYPO3 Flow distribution.
 #
 _flow_subcommand() {
-  if [ ! -f Data/Temporary/Development/.flow-autocompletion-command-$cmd ]; then
+  if [[ ! -f Data/Temporary/Development/.flow-autocompletion-command-$cmd ]]; then
     ./flow help $cmd > Data/Temporary/Development/.flow-autocompletion-command-$cmd
   fi
 
@@ -85,50 +85,10 @@ _flow_is_inside_base_distribution() {
 _flow_list_packages() {
   local flowBaseDir=$1
   #composer status -vvv | grep "Executing command" | cut -d'(' -f2 | cut -d')' -f1 | grep -v "Packages/Libraries" | grep Packages
-  find $flowBaseDir -name "composer.json" -type f | grep -v "Packages/Libraries" | grep "Packages" | sed -e "s_composer.json__g"
+  find $flowBaseDir -name "composer.json" -type f | grep -v -e "Packages/Libraries" -e "/Resources/" | grep "Packages" | sed -e "s_composer.json__g"
 }
 
-#
-# Expands a package directory for in all parameters starting with $3.
-# $1 defines the a folder within the package directory that should be
-# included after the package directory, but before the rest. For example:
-#      var=$(_flow_package_dir_expansion $flowBaseDir Tests/Unit P/TYPO3.Flow/Cli)
-#      var=$(_flow_package_dir_expansion $flowBaseDir Tests/Unit P:TYPO3.Flow:Cli)
-#        echoes <flowBaseDir>/Packages/Framework/TYPO3.Flow/Tests/Unit/Cli
-#      var=$(_flow_package_dir_expansion $flowBaseDir Tests/Unit P:TYPO3.Flow)
-#        echoes <flowBaseDir>/Packages/Framework/TYPO3.Flow/Tests/Unit
-#
-_flow_package_dir_expansion() {
-  local expandedDirs
-  local packageDir
-  local flowBaseDir=${1%%/} #remove trailing slash(es)
-  local dirInPkg=${2##/}    #remove initial slash(es)
-  dirInPkg=${dirInPkg%%/}   #remove trailing slash(es)
-  shift
-  shift
-
-  for entry in $@; do
-    if [[ ${entry:0:2} == "P/" ]] || [[ ${entry:0:2} == "P:" ]]; then
-      # Assume that the package key does not have / or : in it.
-
-      entry=${entry:2} # remove "P/" or "P:"
-      if [[ ! $entry == *:* ]]; then
-        entry=${entry/\//:} # replace first / with :
-        if [[ ! $entry == *:* ]]; then
-          entry=${entry}: # must be only a package name
-        fi
-      fi
-      # now everything before the first : is the name of the package.
-      packageDir=$(_flow_list_packages $flowBaseDir | grep -i /${entry%%:*}/)
-
-      # packageDir includes a trailing slash! dirInPkg doesn't.
-      entry=${packageDir}${dirInPkg}/${entry##*:}
-    fi
-    expandedDirs+=" $entry"
-  done
-
-  echo ${expandedDirs# } #remove initial space
-}
+source "$ZSH_CUSTOM/plugins/flow/flow.expansion.zsh"
 
 ###########################################
 # Section: TYPO3 Flow Command from subdir #
@@ -146,7 +106,7 @@ flow() {
   fi
 
   local startDirectory=`pwd`
-  while [ ! -f flow ]; do
+  while [[ ! -f flow ]]; do
     cd ..
   done
   ./flow $@
@@ -167,12 +127,12 @@ funittest() {
   fi
 
   local startDirectory=`pwd`
-  while [ ! -f flow ]; do
+  while [[ ! -f flow ]]; do
     cd ..
   done
   local flowBaseDir=`pwd`
   local phpunit="phpunit"
-  if [ -f bin/phpunit ]
+  if [[ -f bin/phpunit ]]
     local phpunit="$flowBaseDir/bin/phpunit"
 
   cd $startDirectory
@@ -191,12 +151,12 @@ ffunctionaltest() {
   fi
 
   local startDirectory=`pwd`
-  while [ ! -f flow ]; do
+  while [[ ! -f flow ]]; do
     cd ..
   done
   local flowBaseDir=`pwd`
   local phpunit="phpunit"
-  if [ -f bin/phpunit ]
+  if [[ -f bin/phpunit ]]
     local phpunit="$flowBaseDir/bin/phpunit"
 
   cd $startDirectory
@@ -216,12 +176,12 @@ fbehattest() {
   fi
 
   local startDirectory=`pwd`
-  while [ ! -f flow ]; do
+  while [[ ! -f flow ]]; do
     cd ..
   done
   local flowBaseDir=`pwd`
 
-  if [ ! -f bin/behat ]; then
+  if [[ ! -f bin/behat ]]; then
     echo "Behat not found, downloading flowpack/behat"
     composer require --dev --prefer-source --no-interaction flowpack/behat dev-master
     rm -Rf Data/Temporary
@@ -233,7 +193,7 @@ fbehattest() {
   cd $startDirectory
 
   # bin/behat -c Packages/Application/My.Package/Tests/Behavior/behat.yml
-	# P:TYPO3.Flow:behat.yml.dist
+  # P:TYPO3.Flow:behat.yml.dist
   tests=$(_flow_package_dir_expansion $flowBaseDir "Tests/Behavior" $@)
   $flowBaseDir/bin/behat -c $tests
 }
@@ -251,7 +211,7 @@ f-package-foreach() {
   fi
 
   local startDirectory=`pwd`
-  while [ ! -f flow ]; do
+  while [[ ! -f flow ]]; do
     cd ..
   done
 
@@ -297,7 +257,7 @@ f-set-distribution() {
   done
   echo -n "Your Choice: "
   read choice
-  echo $flow_distribution_paths[$choice] > $ZSH/custom/plugins/flow/f-environment-choice.txt
+  echo $flow_distribution_paths[$choice] > $ZSH_CUSTOM/plugins/flow/f-environment-choice.txt
 
   # Now, after updating f-environment-choice.txt, send USR2 signal to
   # all running ZSH instances such that they reload
@@ -319,10 +279,10 @@ TRAPUSR2() {
 # Internal helper to update cdpath
 #
 _f-update-distribution-path() {
-  if [ ! -f $ZSH/custom/plugins/flow/f-environment-choice.txt ]; then
+  if [[ ! -f $ZSH_CUSTOM/plugins/flow/f-environment-choice.txt ]]; then
     return
   fi
-  local fBasePath=`cat $ZSH/custom/plugins/flow/f-environment-choice.txt`
+  local fBasePath=`cat $ZSH_CUSTOM/plugins/flow/f-environment-choice.txt`
 
   # we need to add "." to the current CDPath, else Composer etc breaks...
   cdpath=(. $fBasePath/Packages/Framework/ $fBasePath/Packages/Application/ $fBasePath/Packages/Sites/)
@@ -343,12 +303,12 @@ flogs() {
   fi
 
   local startDirectory=`pwd`
-  while [ ! -f flow ]; do
+  while [[ ! -f flow ]]; do
     cd ..
   done
   local flowBaseDir=`pwd`
   cd $startDirectory
 
-  flow_path="$flowBaseDir" osascript $ZSH/custom/plugins/flow/flowlog.applescript
+  flow_path="$flowBaseDir" osascript $ZSH_CUSTOM/plugins/flow/flowlog.applescript
 
 }
